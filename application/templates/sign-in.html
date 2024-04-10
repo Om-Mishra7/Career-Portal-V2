@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | Career Portal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f1f1f1;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+
+        select, input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        p {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+        function handleSignIn() {
+            let user_role = document.querySelector('select[name="role"]').value;
+            let user_email = document.querySelector('input[name="email"]').value;
+            let user_password = document.querySelector('input[name="password"]').value;
+
+            if (user_email === '' || user_password === '') {
+                alert(`The ${user_email === '' ? 'Email' : 'Password'} field is required.`);
+                document.querySelector('button').disabled = false;
+                document.querySelector('button').innerText = 'Sign In';
+                return;
+            }
+
+            fetch('/api/v1/auth/sign-in', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_type: user_role,
+                    email: user_email,
+                    password: user_password
+                })
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        localStorage.setItem('token', data.token);
+                        window.location.href = '/dashboard';
+                    } else {
+                        alert(data.message);
+                        document.querySelector('button').disabled = false;
+                        document.querySelector('button').innerText = 'Sign In';
+                    }
+                })
+                .catch(error => {
+                    alert('An error occurred. Please try again later.');
+                    document.querySelector('button').disabled = false;
+                    document.querySelector('button').innerText = 'Sign In';
+                });
+        }
+
+    </script>
+</head>
+
+<body>
+
+    <h1>Sign In</h1>
+
+    <form action="/sign-in" method="post">
+        <select name="role" required>
+            <option value="student">Student</option>
+            <option value="company">Company</option>
+            <option value="placement_officer">Placement Officer</option>
+        </select>
+        <input type="text" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <p>Forgot your password? <a href="/forgot-password">Reset Password</a></p>
+        <button type="submit" onclick="this.disabled = true; this.innerText = 'Signing In...'; handleSignIn();">Sign
+            In</button>
+    </form>
+
+    <p>Don't have an account? <a href="/sign-up">Sign Up</a></p>
+
+</body>
+
+</html>
